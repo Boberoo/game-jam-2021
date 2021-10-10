@@ -53,8 +53,9 @@ local sequences_johnWalking = {
 
 local john = display.newSprite( sheet_johnWalking, sequences_johnWalking )
 
--ohn.x = display.contentCenterX
+john.x = display.contentCenterX
 john.y = display.contentCenterY+250
+john:scale(0.125, 0.125)
 
 local ughSound = audio.loadSound( "Audio/Ugh1.m4a" )
 --audio.play( ughSound )
