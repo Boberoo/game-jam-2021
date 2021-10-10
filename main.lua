@@ -14,6 +14,11 @@ backWall.x = display.contentCenterX
 backWall.y = display.contentCenterY-180
 backWall.alpha = 0.9
 
+local door = display.newImageRect( "Images/Door.png", 80, 80 )
+door.x = display.contentCenterX+36
+door.y = display.contentCenterY+87
+door.rotation = 270
+
 local sideWallLeft = display.newImageRect( "Images/SideWall.png", 10, 570 )
 sideWallLeft.x = display.contentCenterX-160
 sideWallLeft.y = display.contentCenterY
@@ -59,6 +64,7 @@ john:scale(0.125, 0.125)
 
 local ughSound = audio.loadSound( "Audio/Ugh1.m4a" )
 --audio.play( ughSound )
+local ughSound = audio.loadSound( "Audio/Snore.m4a" )
 
 
 
@@ -69,7 +75,8 @@ physics.setGravity( 0, -0.1 )
 physics.addBody( backWall, "static" )
 physics.addBody( sideWallLeft, "static" )
 physics.addBody( sideWallRight, "static" )
-physics.addBody( john, "dynamic", { radius=50, bounce=0.01, density=5.0, friction=0.9 } )
+physics.addBody( door, "static", { radius=20 } )
+physics.addBody( john, "dynamic", { radius=20, bounce=0.01, density=5.0, friction=0.9 } )
 
 john:play()
 
@@ -84,12 +91,33 @@ local function onAccelerate( event )
     if event.isShake then
         john.y = 570
         john.x = display.contentCenterX
+        john.isVisible = true
     else
         moveJohn(event.xGravity)
     end    
 end
   
 Runtime:addEventListener( "accelerometer", onAccelerate )
+
+local function onReachHome ()
+  --display.remove( john )
+  john.isVisible = false
+  
+  local pSystem = physics.newParticleSystem( { filename = "Images/Z.png", radius = 20} )
+  pSystem:createGroup(
+    {
+        flags = { "elastic", "reactive" },
+        x = door.x,
+        y = door.y,
+        color = { 0, 0.8, 0.5, 1 },
+        shape = { 0,0, 34,34, 0,64 },
+        --lifetime = 30
+        linearVelocityX = 0.1,
+        linearVelocityY = 0.1 
+    })
+  audio.play( snoreSound )   
+ 
+end
 
 local function onCollision( event )
  
@@ -100,10 +128,15 @@ local function onCollision( event )
  
         if ( ( obj1 == john ) or
              ( obj2 == john ) ) then
-            
-            --display.remove( obj1 )
-           
-            audio.play( ughSound )            
+            if ( ( obj1 == door ) or
+                 ( obj2 == door ) ) then
+                timer.performWithDelay( 30, function()
+                  onReachHome() --can;t start a partical system otherwise
+                end, 1)
+                
+            else
+                audio.play( ughSound )   
+            end            
         end
     end
 end 
@@ -136,6 +169,9 @@ local function onTouch( event )
 end 
 
 Runtime:addEventListener( "touch", onTouch )
+
+
+
 
 
 
